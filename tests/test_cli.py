@@ -131,6 +131,28 @@ class TestCliExtract:
 
         assert count == 0  # No commits from this author
 
+    def test_extract_with_empty_authors_extracts_all(
+        self, git_repo: Path, tmp_path: Path
+    ) -> None:
+        """Empty or whitespace-only authors should not filter commits."""
+        db_path = tmp_path / "output.duckdb"
+
+        result = runner.invoke(
+            app,
+            [
+                "--repo", str(git_repo),
+                "--db", str(db_path),
+                "--authors", "  ",  # Whitespace-only
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        with SymbolDatabase(db_path) as db:
+            count = db.get_symbol_count()
+
+        assert count >= 2  # Should extract all, not filter to empty
+
     def test_extract_invalid_repo_fails(self, tmp_path: Path) -> None:
         db_path = tmp_path / "output.duckdb"
         fake_repo = tmp_path / "not_a_repo"

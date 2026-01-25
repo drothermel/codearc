@@ -80,7 +80,9 @@ def extract(
     if verbose:
         logging.basicConfig(level=logging.INFO)
 
-    author_list = [a.strip() for a in authors.split(",")] if authors else None
+    author_list = None
+    if authors and authors.strip():
+        author_list = [a.strip() for a in authors.split(",") if a.strip()] or None
 
     ignore_patterns = IgnorePatterns()
     if ignore:
