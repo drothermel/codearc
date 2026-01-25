@@ -1,14 +1,65 @@
 [project]
 name = "history-extractor"
 version = "0.1.0"
-description = "Add your description here"
+description = "Mine a Python repo's git history to produce a DuckDB database of all distinct versions of every function/class"
 readme = "README.md"
 authors = [
     { name = "Danielle Rothermel", email = "danielle.rothermel@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydriller>=2.6",
+    "libcst>=1.1",
+    "duckdb>=0.10",
+    "pydantic>=2.0",
+    "typer>=0.12",
+    "rich>=13.0",
+]
+
+[project.scripts]
+history-extractor = "history_extractor.cli:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-xdist>=3.5",
+]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    # Core
+    "E",      # pycodestyle errors
+    "F",      # Pyflakes (undefined names, unused imports)
+    "I",      # isort (import sorting)
+    "UP",     # pyupgrade (Python 3.12+ syntax)
+    # Bug prevention
+    "B",      # flake8-bugbear (common bugs, design issues)
+    "SIM",    # flake8-simplify (reduce complexity)
+    "C4",     # flake8-comprehensions (better comprehensions)
+    "PIE",    # flake8-pie (misc cleanups)
+    "RUF",    # Ruff-specific (various catches)
+    # Type safety
+    "TCH",    # flake8-type-checking (TYPE_CHECKING imports)
+    # Modern Python
+    "PTH",    # flake8-use-pathlib (Path over os.path)
+    "PERF",   # Perflint (performance anti-patterns)
+    "FURB",   # refurb (modern idioms)
+    # Logging & testing
+    "LOG",    # flake8-logging (logging best practices)
+    "PT",     # flake8-pytest-style (pytest conventions)
+]
+ignore = [
+    "SIM108",  # ternary instead of if-else (can hurt readability)
+    "SIM117",  # multiple with statements (sometimes clearer separate)
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
