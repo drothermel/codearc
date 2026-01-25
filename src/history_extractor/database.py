@@ -100,7 +100,12 @@ class SymbolDatabase:
         return True
 
     def flush(self) -> int:
-        """Write pending symbols to database. Returns count of symbols written."""
+        """
+        Write pending symbols to database.
+
+        Returns the number of symbols attempted (not necessarily inserted,
+        as ON CONFLICT DO NOTHING may skip duplicates already in the DB).
+        """
         if not self._pending or not self.conn:
             return 0
 
