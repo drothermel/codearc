@@ -11,6 +11,10 @@ from history_extractor.models.symbol import ExtractedSymbol, SymbolVersion
 
 def demo_ignore_patterns() -> None:
     print("=== Ignore Patterns ===")
+    print("IgnorePatterns defines glob patterns for files to skip during extraction.")
+    print("Default patterns exclude venv, __pycache__, *_pb2.py, etc.")
+    print("Testing which paths would be ignored vs processed:\n")
+
     patterns = IgnorePatterns()
 
     test_paths = [
@@ -31,6 +35,9 @@ def demo_ignore_patterns() -> None:
 
 def demo_extraction_config() -> None:
     print("=== Extraction Config ===")
+    print("ExtractionConfig holds all settings for a mining run.")
+    print("It bundles repo path, output DB, filters, and sub-configs.\n")
+
     config = ExtractionConfig(
         repo_path=Path("/home/user/my-project"),
         db_path=Path("/tmp/symbols.duckdb"),
@@ -46,6 +53,11 @@ def demo_extraction_config() -> None:
 
 def demo_symbol_keys() -> None:
     print("=== Symbol Keys ===")
+    print("SymbolVersion represents a function/class at a specific commit.")
+    print("It has two computed keys for deduplication:")
+    print("  - symbol_key: identifies the symbol across all versions")
+    print("  - version_key: identifies this exact code version (includes hash)\n")
+
     version = SymbolVersion(
         repo_id="my-project",
         commit_hash="a1b2c3d4e5f6",
@@ -71,6 +83,10 @@ def demo_symbol_keys() -> None:
 
 def demo_extracted_symbol() -> None:
     print("=== Extracted Symbol ===")
+    print("ExtractedSymbol is the raw output from parsing a single file.")
+    print("It captures name, code, line range, and docstring.")
+    print("Later, this gets enriched with commit info to become SymbolVersion.\n")
+
     symbol = ExtractedSymbol(
         name="calculate",
         qualname="MathUtils.calculate",
@@ -90,6 +106,9 @@ def demo_extracted_symbol() -> None:
 
 def demo_stats() -> None:
     print("=== Mining Stats ===")
+    print("MiningStats tracks progress during extraction.")
+    print("Simulating: 3 commits, 2 files, 15 symbols, 1 parse error\n")
+
     stats = MiningStats()
     stats.increment_commits_processed()
     stats.increment_commits_processed()

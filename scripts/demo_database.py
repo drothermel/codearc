@@ -14,6 +14,7 @@ def create_sample_symbols() -> list[SymbolVersion]:
     base_time = datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
 
     return [
+        # Same function, two different versions (different code_hash)
         SymbolVersion(
             repo_id="demo-repo",
             commit_hash="aaa111",
@@ -42,6 +43,7 @@ def create_sample_symbols() -> list[SymbolVersion]:
             start_line=1,
             end_line=1,
         ),
+        # A class
         SymbolVersion(
             repo_id="demo-repo",
             commit_hash="aaa111",
@@ -56,6 +58,7 @@ def create_sample_symbols() -> list[SymbolVersion]:
             start_line=5,
             end_line=6,
         ),
+        # A method (qualname includes class name)
         SymbolVersion(
             repo_id="demo-repo",
             commit_hash="aaa111",
@@ -77,31 +80,42 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         db_path = Path(tmp) / "demo.duckdb"
         print("=== Database Demo ===")
-        print(f"DB path: {db_path}\n")
+        print("SymbolDatabase manages DuckDB storage for extracted symbols.")
+        print("It handles schema creation, batched inserts, and deduplication.")
+        print(f"\nUsing temp DB: {db_path}\n")
 
         with SymbolDatabase(db_path) as db:
-            print("Inserting sample symbols...")
+            print("--- Inserting Sample Symbols ---")
+            print("We have 4 symbols: 2 versions of 'helper', a 'User' class,")
+            print("and a 'User.get_name' method. Note they share symbol_key")
+            print("but have different version_keys due to code_hash.\n")
+
             symbols = create_sample_symbols()
             for sym in symbols:
                 added = db.add(sym)
                 status = "added" if added else "duplicate"
-                print(f"  {status}: {sym.symbol_key}")
+                print(f"  {status}: {sym.symbol_key} (hash: {sym.code_hash})")
 
+            print("\n--- Flushing to DB ---")
+            print("db.add() stages symbols in memory. db.flush() writes to disk.")
             count = db.flush()
-            print(f"\nFlushed {count} symbols to DB")
+            print(f"Flushed {count} symbols to DB")
 
-            print("\n--- Querying symbols ---")
+            print("\n--- Querying Symbols ---")
+            print("Raw SQL queries work directly on the DuckDB connection.\n")
             results = db.query(
                 "SELECT symbol_key, kind, code_hash FROM symbol_versions"
             )
             for row in results:
                 print(f"  {row[0]} ({row[1]}) -> {row[2]}")
 
-            print("\n--- Stats ---")
+            print("\n--- Symbol Counts ---")
             print(f"Total symbols: {db.get_symbol_count()}")
             print(f"Symbols in demo-repo: {db.get_symbol_count('demo-repo')}")
 
-            print("\n--- Updating extraction state ---")
+            print("\n--- Extraction State ---")
+            print("extraction_state table tracks progress for resumability.")
+            print("After a crash, we can resume from the last processed commit.\n")
             db.update_state(
                 repo_id="demo-repo",
                 commit_hash="bbb222",
@@ -112,13 +126,17 @@ def main() -> None:
             last = db.get_last_commit("demo-repo")
             print(f"Last processed commit: {last}")
 
-            print("\n--- Duplicate handling ---")
+            print("\n--- Duplicate Handling ---")
+            print("Dedup happens at two levels:")
+            print("  1. In-memory: same version_key in pending batch is skipped")
+            print("  2. On insert: ON CONFLICT DO NOTHING handles DB duplicates\n")
             dup = symbols[0]
             added = db.add(dup)
-            status = "added" if added else "skipped (in-memory)"
-            print(f"Re-adding same symbol: {status}")
+            status = "added to pending" if added else "skipped (in-memory)"
+            print(f"Re-adding symbol after flush: {status}")
+            print("(It's 'added' because pending was cleared after flush)")
             db.flush()
-            print(f"Total after re-add: {db.get_symbol_count()}")
+            print(f"Total after re-add: {db.get_symbol_count()} (unchanged - ON CONFLICT)")
 
 
 if __name__ == "__main__":
