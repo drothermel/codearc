@@ -2,13 +2,39 @@
 
 Mine a Python repo's git history to extract all distinct versions of every function and class into a DuckDB database.
 
-## Usage
+## Quick Start
 
 ```bash
-history-extractor --repo /path/to/repo --db output.duckdb [options]
+# Install
+uv sync
+
+# Extract symbols from a repo
+uv run history-extractor --repo /path/to/repo --db output.duckdb --verbose
+
+# Query the results
+uv run python -c "
+import duckdb
+conn = duckdb.connect('output.duckdb')
+for row in conn.execute('SELECT qualname, kind, COUNT(*) as versions FROM symbol_versions GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 10').fetchall():
+    print(row)
+"
 ```
 
-### Options
+## Installation
+
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+git clone <repo-url>
+cd history-extractor
+uv sync
+```
+
+## CLI Reference
+
+```bash
+history-extractor --repo PATH --db OUTPUT.duckdb [options]
+```
 
 | Option | Description |
 |--------|-------------|
@@ -22,7 +48,7 @@ history-extractor --repo /path/to/repo --db output.duckdb [options]
 | `--ignore PATTERN` | Additional ignore patterns (repeatable) |
 | `-v, --verbose` | Show mining statistics |
 
-### Example
+### Examples
 
 ```bash
 # Mine a repo with verbose output
@@ -30,36 +56,72 @@ history-extractor --repo ~/projects/mylib --db mylib.duckdb --verbose
 
 # Filter by author and date
 history-extractor --repo . --db output.duckdb --authors "Alice,Bob" --since 2024-01-01
+
+# Resume from a specific commit
+history-extractor --repo . --db output.duckdb --since-commit abc123
+
+# Add custom ignore patterns
+history-extractor --repo . --db output.duckdb --ignore "generated/*" --ignore "vendor/*"
 ```
 
-## Current Functionality
+## Features
 
-**Phase 1 (Core Infrastructure)** is complete:
+- **Symbol extraction** - Extracts functions, classes, and methods using LibCST with accurate source positions and qualified names
+- **Version deduplication** - Stores only distinct versions of each symbol (by content hash), avoiding redundant storage
+- **Git history traversal** - Walks commit history with PyDriller, processing only modified Python files
+- **Crash recovery** - Per-commit database writes with extraction state tracking for resumability
+- **Flexible filtering** - Filter by author, date, ignore patterns; skip merge commits by default
+- **Encoding handling** - Gracefully handles non-UTF8 files with fallback encodings
 
-## Setup
+## Database Schema
+
+The extracted data is stored in two tables:
+
+**`symbol_versions`** - All distinct versions of symbols
+- `version_key` - Unique identifier (repo:module:qualname:kind:code_hash)
+- `symbol_key` - Symbol identifier without version (repo:module:qualname:kind)
+- `repo_id`, `commit_hash`, `commit_time` - Git metadata
+- `file_path`, `module`, `start_line`, `end_line` - Location info
+- `kind` - "function" or "class"
+- `qualname` - Qualified name (e.g., `ClassName.method_name`)
+- `code`, `code_hash` - Exact source code and its hash
+- `docstring` - Extracted docstring if present
+
+**`extraction_state`** - Tracks mining progress for resumability
+- `repo_id`, `last_processed_commit`, `total_commits_processed`, etc.
+
+## Demo Scripts
+
+Interactive demos to explore the library's capabilities:
+
+| Script | Description |
+|--------|-------------|
+| `scripts/demo_models.py` | Data models, ignore pattern matching, key generation |
+| `scripts/demo_database.py` | Database operations, deduplication, extraction state |
+| `scripts/demo_extractor.py` | LibCST parsing, symbol extraction with metadata |
+| `scripts/demo_module_paths.py` | File path to module name conversion |
+| `scripts/demo_miner.py` | End-to-end mining of a sample git repo |
+
+Run any demo:
 
 ```bash
-uv sync
+uv run python scripts/demo_miner.py
 ```
 
-## Running Tests
+## Development
+
+### Running Tests
 
 ```bash
 uv run pytest tests/ -v
 ```
 
-**Phase 4 (CLI)** is complete:
-
-- **Typer CLI** - `history-extractor` command with all options for repo mining
-- **Rich output** - Statistics display with `--verbose` flag
-
-## Project Structure
+### Project Structure
 
 ```
 src/history_extractor/
-├── __init__.py
 ├── cli.py               # Typer CLI entrypoint
-├── database.py          # DuckDB schema + insert logic
+├── database.py          # DuckDB schema + operations
 ├── extractor.py         # LibCST symbol extraction
 ├── miner.py             # PyDriller git traversal
 ├── utils.py             # Hashing, module paths, encoding
@@ -71,59 +133,15 @@ src/history_extractor/
     ├── mining_stats.py          # MiningStats
     └── symbol_version.py        # SymbolVersion
 
-scripts/
-├── demo_models.py       # Demo: model instantiation and key generation
-├── demo_database.py     # Demo: DB operations and deduplication
-├── demo_extractor.py    # Demo: parsing Python code and extracting symbols
-├── demo_module_paths.py # Demo: module path resolution for different layouts
-└── demo_miner.py        # Demo: mining a git repo and querying results
-
-tests/
-├── test_cli.py          # Tests for CLI
-├── test_database.py     # Tests for database operations
-├── test_extractor.py    # Tests for symbol extraction
-├── test_miner.py        # Tests for git mining
-├── test_models.py       # Tests for all model classes
-└── test_utils.py        # Tests for utility functions
+scripts/                 # Demo scripts
+tests/                   # Test suite (77 tests)
 ```
 
-## Demo Scripts
+### Dependencies
 
-### Models Demo
-
-Shows how the core data models work - ignore pattern matching, config creation, symbol key generation, and stats tracking.
-
-```bash
-uv run python scripts/demo_models.py
-```
-
-### Database Demo
-
-Shows database operations - inserting symbols, querying, deduplication behavior, and extraction state for resumability.
-
-```bash
-uv run python scripts/demo_database.py
-```
-
-### Extractor Demo
-
-Shows how LibCST parses Python code and extracts functions, classes, and methods with their qualified names and metadata.
-
-```bash
-uv run python scripts/demo_extractor.py
-```
-
-### Module Paths Demo
-
-Shows how file paths are converted to Python module names for different project layouts (simple, src/, explicit package root).
-
-```bash
-uv run python scripts/demo_module_paths.py
-```
-
-### Miner Demo
-Creates a sample git repository, mines it for symbols across commits, and shows version history and query examples.
-
-```bash
-uv run python scripts/demo_miner.py
-```
+- **PyDriller** - Git repository mining
+- **LibCST** - Lossless Python parsing
+- **DuckDB** - Embedded analytics database
+- **Typer** - CLI framework
+- **Rich** - Terminal output formatting
+- **Pydantic** - Data validation and models
