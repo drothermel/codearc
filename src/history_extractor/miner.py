@@ -54,6 +54,8 @@ def mine_repository(config: ExtractionConfig, db: SymbolDatabase) -> MiningStats
         if flushed > 0:
             stats.add_deduplicated(flushed)
 
+        stats.increment_commits_processed()
+
         db.update_state(
             repo_id=repo_id,
             commit_hash=commit.hash,
@@ -61,8 +63,6 @@ def mine_repository(config: ExtractionConfig, db: SymbolDatabase) -> MiningStats
             total_commits=stats.commits_processed,
             total_symbols=stats.symbols_extracted,
         )
-
-        stats.increment_commits_processed()
 
     return stats
 

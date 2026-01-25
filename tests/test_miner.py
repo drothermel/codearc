@@ -185,6 +185,26 @@ class TestMineRepository:
         assert last_commit is not None
         assert len(last_commit) == 40  # Full SHA
 
+    def test_extraction_state_commit_count_matches_stats(
+        self, git_repo: Path, db_path: Path
+    ) -> None:
+        """Verify persisted commit count matches returned stats (no off-by-one)."""
+        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+
+        with SymbolDatabase(db_path) as db:
+            stats = mine_repository(config, db)
+
+        with SymbolDatabase(db_path) as db:
+            result = db.query(
+                "SELECT total_commits_processed FROM extraction_state WHERE repo_id = ?",
+                ["test_repo"],
+            )
+
+        assert len(result) == 1
+        persisted_count = result[0][0]
+        assert persisted_count == stats.commits_processed
+        assert persisted_count == 3  # Sanity check: we created 3 commits
+
     def test_repo_id_from_config(self, git_repo: Path, db_path: Path) -> None:
         config = ExtractionConfig(
             repo_path=git_repo,
