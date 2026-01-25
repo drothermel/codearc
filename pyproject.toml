@@ -16,6 +16,9 @@ dependencies = [
     "rich>=13.0",
 ]
 
+[project.scripts]
+history-extractor = "history_extractor.cli:app"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

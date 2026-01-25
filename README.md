@@ -2,14 +2,39 @@
 
 Mine a Python repo's git history to extract all distinct versions of every function and class into a DuckDB database.
 
-## Features
+## Usage
 
-- **Configuration models** - `ExtractionConfig` for mining settings, `IgnorePatterns` for filtering files (venv, pycache, etc.), `EncodingConfig` for handling different file encodings
-- **Symbol models** - `ExtractedSymbol` for raw parse output, `SymbolVersion` for commit-tied records with deduplication keys
-- **Statistics tracking** - `MiningStats` for progress reporting
-- **Database layer** - `SymbolDatabase` with DuckDB schema, batched inserts, in-memory + on-conflict deduplication, and extraction state for resumability
-- **Utilities** - `compute_code_hash` for deduplication, `file_path_to_module` for converting paths to Python module names, `safe_decode` for handling different file encodings
-- **Symbol extraction** - LibCST-based parser that extracts functions, classes, and methods with qualified names, docstrings, and line numbers. Handles nested classes, skips nested functions, and gracefully handles syntax errors.
+```bash
+history-extractor --repo /path/to/repo --db output.duckdb [options]
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--repo PATH` | Path to the git repository (required) |
+| `--db PATH` | Path to output DuckDB file (required) |
+| `--package-root PATH` | Package root for module path calculation |
+| `--since-commit HASH` | Resume from a specific commit |
+| `--since DATE` | Process commits after date (ISO format) |
+| `--authors "a,b"` | Comma-separated author filter |
+| `--no-merge/--include-merge` | Skip merge commits (default: skip) |
+| `--ignore PATTERN` | Additional ignore patterns (repeatable) |
+| `-v, --verbose` | Show mining statistics |
+
+### Example
+
+```bash
+# Mine a repo with verbose output
+history-extractor --repo ~/projects/mylib --db mylib.duckdb --verbose
+
+# Filter by author and date
+history-extractor --repo . --db output.duckdb --authors "Alice,Bob" --since 2024-01-01
+```
+
+## Current Functionality
+
+**Phase 1 (Core Infrastructure)** is complete:
 
 ## Setup
 
@@ -23,11 +48,17 @@ uv sync
 uv run pytest tests/ -v
 ```
 
+**Phase 4 (CLI)** is complete:
+
+- **Typer CLI** - `history-extractor` command with all options for repo mining
+- **Rich output** - Statistics display with `--verbose` flag
+
 ## Project Structure
 
 ```
 src/history_extractor/
 ├── __init__.py
+├── cli.py               # Typer CLI entrypoint
 ├── database.py          # DuckDB schema + insert logic
 ├── extractor.py         # LibCST symbol extraction
 ├── miner.py             # PyDriller git traversal
@@ -48,11 +79,12 @@ scripts/
 └── demo_miner.py        # Demo: mining a git repo and querying results
 
 tests/
-├── test_models.py       # Tests for all model classes
+├── test_cli.py          # Tests for CLI
 ├── test_database.py     # Tests for database operations
 ├── test_extractor.py    # Tests for symbol extraction
-├── test_utils.py        # Tests for utility functions
-└── test_miner.py        # Tests for git mining
+├── test_miner.py        # Tests for git mining
+├── test_models.py       # Tests for all model classes
+└── test_utils.py        # Tests for utility functions
 ```
 
 ## Demo Scripts
