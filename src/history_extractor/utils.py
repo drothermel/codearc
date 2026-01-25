@@ -69,7 +69,7 @@ def safe_decode(content: bytes, encodings: list[str] | None = None) -> str | Non
     Returns decoded string or None if all encodings fail.
     """
     if encodings is None:
-        encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
+        encodings = ["utf-8", "latin-1", "cp1252"]
 
     for encoding in encodings:
         try:

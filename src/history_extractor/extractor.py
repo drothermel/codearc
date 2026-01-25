@@ -3,7 +3,7 @@ import logging
 import libcst as cst
 from libcst.metadata import MetadataWrapper, PositionProvider
 
-from history_extractor.models.symbol import ExtractedSymbol, SymbolKind
+from history_extractor.models.extracted_symbol import ExtractedSymbol, SymbolKind
 
 logger = logging.getLogger(__name__)
 
