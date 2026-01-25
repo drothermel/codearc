@@ -136,7 +136,8 @@ def main() -> None:
             print(f"Re-adding symbol after flush: {status}")
             print("(It's 'added' because pending was cleared after flush)")
             db.flush()
-            print(f"Total after re-add: {db.get_symbol_count()} (unchanged - ON CONFLICT)")
+            count = db.get_symbol_count()
+            print(f"Total after re-add: {count} (unchanged - ON CONFLICT)")
 
 
 if __name__ == "__main__":
