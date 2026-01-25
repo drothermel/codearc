@@ -89,6 +89,15 @@ class TestExtractSymbols:
         symbols = extract_symbols(code)
         assert symbols[0].docstring == "Unicode docstring."
 
+    def test_docstring_concatenated(self) -> None:
+        # Concatenated string docstring (multiple parts)
+        code = """def foo():
+    "Part one. " "Part two. " "Part three."
+    pass
+"""
+        symbols = extract_symbols(code)
+        assert symbols[0].docstring == "Part one. Part two. Part three."
+
     def test_no_docstring(self) -> None:
         code = "def foo():\n    x = 1"
         symbols = extract_symbols(code)

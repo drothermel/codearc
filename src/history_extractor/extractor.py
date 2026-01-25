@@ -25,6 +25,21 @@ def _extract_string_content(raw: str) -> str | None:
     return None
 
 
+def _collect_string_parts(
+    node: cst.BaseString,
+    parts: list[str],
+) -> None:
+    """Recursively collect string parts from a potentially nested ConcatenatedString."""
+    if isinstance(node, cst.SimpleString):
+        content = _extract_string_content(node.value)
+        if content is not None:
+            parts.append(content)
+    elif isinstance(node, cst.ConcatenatedString):
+        _collect_string_parts(node.left, parts)
+        _collect_string_parts(node.right, parts)
+    # FormattedString (f-strings) are ignored for docstrings
+
+
 def _get_docstring(body: cst.BaseSuite) -> str | None:
     """Extract docstring from a function or class body."""
     if not isinstance(body, cst.IndentedBlock):
@@ -50,12 +65,10 @@ def _get_docstring(body: cst.BaseSuite) -> str | None:
 
     if isinstance(value, cst.ConcatenatedString):
         # Handle concatenated strings (rare for docstrings but possible)
-        parts = []
-        for part in value.left, value.right:
-            if isinstance(part, cst.SimpleString):
-                content = _extract_string_content(part.value)
-                if content is not None:
-                    parts.append(content)
+        # ConcatenatedString can nest: "a" "b" "c" becomes
+        # ConcatenatedString(left=ConcatenatedString(left="a", right="b"), right="c")
+        parts: list[str] = []
+        _collect_string_parts(value, parts)
         return "".join(parts) if parts else None
 
     return None
