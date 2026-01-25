@@ -23,6 +23,13 @@ class TestIgnorePatterns:
         assert patterns.matches("project/venv/lib/foo.py")
         assert patterns.matches(".venv/bin/activate")
 
+    def test_matches_pycache(self) -> None:
+        patterns = IgnorePatterns()
+        # Nested __pycache__
+        assert patterns.matches("src/__pycache__/foo.cpython-312.pyc")
+        # Root-level __pycache__
+        assert patterns.matches("__pycache__/foo.cpython-312.pyc")
+
     def test_matches_pb2(self) -> None:
         patterns = IgnorePatterns()
         assert patterns.matches("proto/service_pb2.py")

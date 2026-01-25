@@ -15,6 +15,7 @@ class IgnorePatterns(BaseModel):
             "venv/**",
             "**/site-packages/**",
             "**/__pycache__/**",
+            "__pycache__/**",
             "**/node_modules/**",
             "**/.git/**",
             ".git/**",
