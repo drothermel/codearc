@@ -8,6 +8,23 @@ from history_extractor.models.symbol import ExtractedSymbol, SymbolKind
 logger = logging.getLogger(__name__)
 
 
+def _extract_string_content(raw: str) -> str | None:
+    """Extract content from a string literal, handling prefixes and quotes."""
+    # Strip string prefixes (r, u, f, b, fr, rf, br, rb, etc.)
+    quote_start = 0
+    while quote_start < len(raw) and raw[quote_start] not in ('"', "'"):
+        quote_start += 1
+    raw = raw[quote_start:]
+
+    # Handle triple quotes
+    if raw.startswith(('"""', "'''")):
+        return raw[3:-3]
+    # Handle single quotes
+    if raw.startswith(('"', "'")):
+        return raw[1:-1]
+    return None
+
+
 def _get_docstring(body: cst.BaseSuite) -> str | None:
     """Extract docstring from a function or class body."""
     if not isinstance(body, cst.IndentedBlock):
@@ -29,25 +46,16 @@ def _get_docstring(body: cst.BaseSuite) -> str | None:
 
     value = first_expr.value
     if isinstance(value, cst.SimpleString):
-        # Remove quotes and unescape
-        raw = value.value
-        # Handle triple quotes
-        if raw.startswith(('"""', "'''")):
-            return raw[3:-3]
-        # Handle single quotes
-        if raw.startswith(('"', "'")):
-            return raw[1:-1]
+        return _extract_string_content(value.value)
 
     if isinstance(value, cst.ConcatenatedString):
         # Handle concatenated strings (rare for docstrings but possible)
         parts = []
         for part in value.left, value.right:
             if isinstance(part, cst.SimpleString):
-                raw = part.value
-                if raw.startswith(('"""', "'''")):
-                    parts.append(raw[3:-3])
-                elif raw.startswith(('"', "'")):
-                    parts.append(raw[1:-1])
+                content = _extract_string_content(part.value)
+                if content is not None:
+                    parts.append(content)
         return "".join(parts) if parts else None
 
     return None

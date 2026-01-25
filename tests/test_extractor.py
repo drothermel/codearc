@@ -71,6 +71,24 @@ class TestExtractSymbols:
         symbols = extract_symbols(code)
         assert symbols[0].docstring == "Single quote docstring."
 
+    def test_docstring_with_prefix(self) -> None:
+        # Raw string docstring (common for regex examples)
+        code = r'''def foo():
+    r"""Raw docstring with \n escape."""
+    pass
+'''
+        symbols = extract_symbols(code)
+        assert symbols[0].docstring == r"Raw docstring with \n escape."
+
+    def test_docstring_unicode_prefix(self) -> None:
+        # Unicode prefix (Python 2/3 compatible code)
+        code = '''def foo():
+    u"""Unicode docstring."""
+    pass
+'''
+        symbols = extract_symbols(code)
+        assert symbols[0].docstring == "Unicode docstring."
+
     def test_no_docstring(self) -> None:
         code = "def foo():\n    x = 1"
         symbols = extract_symbols(code)

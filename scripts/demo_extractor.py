@@ -48,7 +48,8 @@ def main() -> None:
         if sym.docstring:
             # Truncate long docstrings
             doc = sym.docstring.replace("\n", " ")[:50]
-            print(f"    Docstring: {doc}...")
+            suffix = "..." if len(sym.docstring) > 50 else ""
+            print(f"    Docstring: {doc}{suffix}")
         # Show first non-empty line of code
         first_line = sym.code.strip().split("\n")[0][:60]
         print(f"    Code: {first_line}")
