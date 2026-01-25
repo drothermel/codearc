@@ -74,7 +74,8 @@ class TestCliExtract:
     def test_extract_populates_symbols(self, git_repo: Path, tmp_path: Path) -> None:
         db_path = tmp_path / "output.duckdb"
 
-        runner.invoke(app, ["--repo", str(git_repo), "--db", str(db_path)])
+        result = runner.invoke(app, ["--repo", str(git_repo), "--db", str(db_path)])
+        assert result.exit_code == 0, result.output
 
         with SymbolDatabase(db_path) as db:
             count = db.get_symbol_count()
