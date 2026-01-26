@@ -64,9 +64,7 @@ class TestCliExtract:
     def test_extract_creates_database(self, git_repo: Path, tmp_path: Path) -> None:
         db_path = tmp_path / "output.duckdb"
 
-        result = runner.invoke(
-            app, ["--repo", str(git_repo), "--db", str(db_path)]
-        )
+        result = runner.invoke(app, ["--repo", str(git_repo), "--db", str(db_path)])
 
         assert result.exit_code == 0
         assert db_path.exists()
@@ -99,9 +97,12 @@ class TestCliExtract:
         result = runner.invoke(
             app,
             [
-                "--repo", str(git_repo),
-                "--db", str(db_path),
-                "--ignore", "models.py",
+                "--repo",
+                str(git_repo),
+                "--db",
+                str(db_path),
+                "--ignore",
+                "models.py",
             ],
         )
 
@@ -118,9 +119,12 @@ class TestCliExtract:
         result = runner.invoke(
             app,
             [
-                "--repo", str(git_repo),
-                "--db", str(db_path),
-                "--authors", "Nonexistent Author",
+                "--repo",
+                str(git_repo),
+                "--db",
+                str(db_path),
+                "--authors",
+                "Nonexistent Author",
             ],
         )
 
@@ -140,9 +144,12 @@ class TestCliExtract:
         result = runner.invoke(
             app,
             [
-                "--repo", str(git_repo),
-                "--db", str(db_path),
-                "--authors", "  ",  # Whitespace-only
+                "--repo",
+                str(git_repo),
+                "--db",
+                str(db_path),
+                "--authors",
+                "  ",  # Whitespace-only
             ],
         )
 
@@ -158,9 +165,7 @@ class TestCliExtract:
         fake_repo = tmp_path / "not_a_repo"
         fake_repo.mkdir()
 
-        result = runner.invoke(
-            app, ["--repo", str(fake_repo), "--db", str(db_path)]
-        )
+        result = runner.invoke(app, ["--repo", str(fake_repo), "--db", str(db_path)])
 
         assert result.exit_code != 0
 

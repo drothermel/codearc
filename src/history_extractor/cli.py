@@ -6,8 +6,9 @@ import typer
 from rich.console import Console
 
 from history_extractor.database import SymbolDatabase
-from history_extractor.miner import mine_repository
-from history_extractor.models.config import ExtractionConfig, IgnorePatterns
+from history_extractor.mining.ignore_patterns import IgnorePatterns
+from history_extractor.mining.miner import mine_repository
+from history_extractor.mining.mining_config import MiningConfig
 
 app = typer.Typer(
     name="history-extractor",
@@ -37,7 +38,7 @@ def extract(
     package_root: Path | None = typer.Option(
         None,
         "--package-root",
-        help="Package root for module path calculation. Defaults to src/ if present, else repo root.",
+        help="Package root for module path calculation.",
         exists=True,
         file_okay=False,
         dir_okay=True,
@@ -86,11 +87,9 @@ def extract(
 
     ignore_patterns = IgnorePatterns()
     if ignore:
-        ignore_patterns = IgnorePatterns(
-            patterns=ignore_patterns.patterns + ignore
-        )
+        ignore_patterns = IgnorePatterns(patterns=ignore_patterns.patterns + ignore)
 
-    config = ExtractionConfig(
+    config = MiningConfig(
         repo_path=repo,
         db_path=db,
         package_root=package_root,

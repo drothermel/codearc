@@ -58,6 +58,7 @@ select = [
 ignore = [
     "SIM108",  # ternary instead of if-else (can hurt readability)
     "SIM117",  # multiple with statements (sometimes clearer separate)
+    "B008",    # function calls in argument defaults (standard for Typer)
 ]
 
 [tool.pytest.ini_options]

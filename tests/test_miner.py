@@ -197,7 +197,8 @@ class TestMineRepository:
 
         with SymbolDatabase(db_path) as db:
             result = db.query(
-                "SELECT total_commits_processed FROM extraction_state WHERE repo_id = ?",
+                "SELECT total_commits_processed FROM extraction_state "
+                "WHERE repo_id = ?",
                 ["test_repo"],
             )
 
