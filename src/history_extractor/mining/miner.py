@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from pydriller import Repository
+from pydriller import Commit, Repository
 
 from history_extractor.database import SymbolDatabase
 from history_extractor.extraction.extract_symbols import extract_symbols
@@ -104,7 +104,7 @@ def _create_symbol_version(
 
 
 def _process_commit(
-    commit,
+    commit: Commit,
     config: MiningConfig,
     db: SymbolDatabase,
     repo_id: str,

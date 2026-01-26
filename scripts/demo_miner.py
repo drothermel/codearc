@@ -144,6 +144,7 @@ def main() -> None:
             cwd=repo_path,
             capture_output=True,
             text=True,
+            check=True,
         )
         print("\nGit history:")
         for line in result.stdout.strip().split("\n"):
