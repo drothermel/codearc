@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from fnmatch import fnmatch
 
 
 class IgnorePatterns(BaseModel):
@@ -28,6 +29,5 @@ class IgnorePatterns(BaseModel):
 
     def matches(self, path: str) -> bool:
         """Check if path matches any ignore pattern."""
-        from fnmatch import fnmatch
 
         return any(fnmatch(path, pattern) for pattern in self.patterns)

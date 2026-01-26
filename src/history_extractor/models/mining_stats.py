@@ -39,15 +39,9 @@ class MiningStats(BaseModel):
 
     def summary(self) -> str:
         """Return a human-readable summary."""
-        c = self.commits_processed
-        s = self.commits_skipped
-        f = self.files_processed
-        fs = self.files_skipped
-        sym = self.symbols_extracted
-        dup = self.symbols_deduplicated
         return (
-            f"Commits: {c} processed, {s} skipped | "
-            f"Files: {f} processed, {fs} skipped\n"
-            f"Symbols: {sym} extracted, {dup} deduped | "
+            f"Commits: {self.commits_processed} processed, {self.commits_skipped} skipped | "
+            f"Files: {self.files_processed} processed, {self.files_skipped} skipped\n"
+            f"Symbols: {self.symbols_extracted} extracted, {self.symbols_deduplicated} deduped | "
             f"Errors: {self.parse_errors} parse, {self.encoding_errors} encoding"
         )
