@@ -21,6 +21,8 @@ class TestIgnorePatterns:
         patterns = IgnorePatterns()
         assert patterns.matches("project/venv/lib/foo.py")
         assert patterns.matches(".venv/bin/activate")
+        # Root-level venv (tests **/ pattern expansion)
+        assert patterns.matches("venv/lib/foo.py")
 
     def test_matches_pycache(self) -> None:
         patterns = IgnorePatterns()
