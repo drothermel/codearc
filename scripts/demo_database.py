@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from history_extractor.database import SymbolDatabase
-from history_extractor.models.symbol_version import SymbolVersion
+from history_extractor.mining.symbol_version import SymbolVersion
 
 
 def create_sample_symbols() -> list[SymbolVersion]:

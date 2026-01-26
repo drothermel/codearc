@@ -122,19 +122,23 @@ uv run pytest tests/ -v
 src/history_extractor/
 ├── cli.py               # Typer CLI entrypoint
 ├── database.py          # DuckDB schema + operations
-├── extractor.py         # LibCST symbol extraction
-├── miner.py             # PyDriller git traversal
 ├── utils.py             # Hashing, module paths, encoding
-└── models/
-    ├── encoding_config.py       # EncodingConfig
-    ├── extracted_symbol.py      # ExtractedSymbol, SymbolKind
-    ├── extraction_config.py     # ExtractionConfig
-    ├── ignore_patterns.py       # IgnorePatterns
-    ├── mining_stats.py          # MiningStats
-    └── symbol_version.py        # SymbolVersion
+├── extraction/          # Symbol extraction from source
+│   ├── extract_symbols.py   # Main extraction entry point
+│   ├── symbol_extractor.py  # LibCST visitor for symbols
+│   └── docstring.py         # Docstring extraction
+├── mining/              # Git history mining
+│   ├── miner.py             # PyDriller git traversal
+│   ├── mining_config.py     # MiningConfig
+│   ├── mining_stats.py      # MiningStats
+│   ├── symbol_version.py    # SymbolVersion
+│   ├── ignore_patterns.py   # IgnorePatterns
+│   └── encoding_config.py   # EncodingConfig
+└── models/              # Shared models
+    └── extracted_symbol.py  # ExtractedSymbol, SymbolKind
 
 scripts/                 # Demo scripts
-tests/                   # Test suite (77 tests)
+tests/                   # Test suite (80 tests)
 ```
 
 ### Dependencies
