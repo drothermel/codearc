@@ -6,7 +6,7 @@ from typing import Self
 
 import duckdb
 
-from history_extractor.mining.symbol_version import SymbolVersion
+from codearc.mining.symbol_version import SymbolVersion
 
 logger = logging.getLogger(__name__)
 

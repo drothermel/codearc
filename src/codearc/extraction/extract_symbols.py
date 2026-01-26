@@ -3,8 +3,8 @@ import logging
 import libcst as cst
 from libcst.metadata import MetadataWrapper
 
-from history_extractor.extraction.symbol_extractor import SymbolExtractor
-from history_extractor.models.extracted_symbol import ExtractedSymbol
+from codearc.extraction.symbol_extractor import SymbolExtractor
+from codearc.models.extracted_symbol import ExtractedSymbol
 
 logger = logging.getLogger(__name__)
 

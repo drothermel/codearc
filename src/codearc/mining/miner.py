@@ -3,13 +3,13 @@ from datetime import datetime
 
 from pydriller import Commit, Repository
 
-from history_extractor.database import SymbolDatabase
-from history_extractor.extraction.extract_symbols import extract_symbols
-from history_extractor.mining.mining_config import MiningConfig
-from history_extractor.mining.mining_stats import MiningStats
-from history_extractor.mining.symbol_version import SymbolVersion
-from history_extractor.models.extracted_symbol import ExtractedSymbol
-from history_extractor.utils import (
+from codearc.database import SymbolDatabase
+from codearc.extraction.extract_symbols import extract_symbols
+from codearc.mining.mining_config import MiningConfig
+from codearc.mining.mining_stats import MiningStats
+from codearc.mining.symbol_version import SymbolVersion
+from codearc.models.extracted_symbol import ExtractedSymbol
+from codearc.utils import (
     compute_code_hash,
     ensure_utc,
     file_path_to_module,
@@ -151,11 +151,17 @@ def _process_commit(
             continue
 
         # Convert to SymbolVersion and add to DB
-        module = file_path_to_module(
-            file_path,
-            config.repo_path,
-            config.package_root,
-        )
+        try:
+            module = file_path_to_module(
+                file_path,
+                config.repo_path,
+                config.package_root,
+            )
+        except ValueError:
+            # File is outside package root (e.g., tests/, scripts/)
+            # Skip since we only extract from package code
+            stats.increment_files_processed()
+            continue
 
         for sym in symbols:
             version = _create_symbol_version(

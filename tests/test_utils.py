@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from history_extractor.utils import compute_code_hash, file_path_to_module, safe_decode
+from codearc.utils import compute_code_hash, file_path_to_module, safe_decode
 
 
 class TestComputeCodeHash:
@@ -37,6 +37,7 @@ class TestFilePathToModule:
 
     def test_with_explicit_package_root(self, tmp_path: Path) -> None:
         package_root = tmp_path / "lib"
+        package_root.mkdir()
         result = file_path_to_module(
             "lib/mypackage/core.py", tmp_path, package_root=package_root
         )

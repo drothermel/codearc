@@ -4,7 +4,7 @@
 import tempfile
 from pathlib import Path
 
-from history_extractor.utils import file_path_to_module
+from codearc.utils import file_path_to_module
 
 
 def main() -> None:
@@ -65,6 +65,7 @@ def main() -> None:
         print()
 
         package_root = repo_root / "lib" / "python"
+        package_root.mkdir(parents=True)
         cases = [
             ("lib/python/mypackage/core.py", "mypackage.core"),
         ]

@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from history_extractor.mining.encoding_config import EncodingConfig
-from history_extractor.mining.ignore_patterns import IgnorePatterns
-from history_extractor.mining.mining_config import MiningConfig
-from history_extractor.mining.mining_stats import MiningStats
-from history_extractor.mining.symbol_version import SymbolVersion
-from history_extractor.models.extracted_symbol import ExtractedSymbol
+from codearc.mining.encoding_config import EncodingConfig
+from codearc.mining.ignore_patterns import IgnorePatterns
+from codearc.mining.mining_config import MiningConfig
+from codearc.mining.mining_stats import MiningStats
+from codearc.mining.symbol_version import SymbolVersion
+from codearc.models.extracted_symbol import ExtractedSymbol
 
 
 class TestIgnorePatterns:
