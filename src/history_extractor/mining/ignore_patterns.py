@@ -10,14 +10,10 @@ class IgnorePatterns(BaseModel):
         default=[
             "**/venv/**",
             "**/.venv/**",
-            ".venv/**",
-            "venv/**",
             "**/site-packages/**",
             "**/__pycache__/**",
-            "__pycache__/**",
             "**/node_modules/**",
             "**/.git/**",
-            ".git/**",
             "*_pb2.py",
             "*_pb2_grpc.py",
             "**/.tox/**",
@@ -30,5 +26,18 @@ class IgnorePatterns(BaseModel):
 
     def matches(self, path: str) -> bool:
         """Check if path matches any ignore pattern."""
+        return any(fnmatch(path, p) for p in self._expanded_patterns())
 
-        return any(fnmatch(path, pattern) for pattern in self.patterns)
+    def _expanded_patterns(self) -> list[str]:
+        """Expand **/ patterns to also match at root level.
+
+        fnmatch treats ** as two wildcards, not as globstar. This means
+        **/venv/** won't match venv/foo.py (no leading path). By expanding
+        patterns that start with **/, we ensure root-level matches work.
+        """
+        expanded = []
+        for p in self.patterns:
+            expanded.append(p)
+            if p.startswith("**/"):
+                expanded.append(p[3:])
+        return expanded

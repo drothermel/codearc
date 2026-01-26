@@ -27,9 +27,11 @@ uv run pytest tests/ -v
 
 ```
 src/history_extractor/
-├── database.py                  # DuckDB schema + insert logic
-├── extractor.py                 # LibCST symbol extraction
-├── utils.py                     # Hashing, module paths, encoding
+├── __init__.py
+├── database.py          # DuckDB schema + insert logic
+├── extractor.py         # LibCST symbol extraction
+├── miner.py             # PyDriller git traversal
+├── utils.py             # Hashing, module paths, encoding
 └── models/
     ├── encoding_config.py       # EncodingConfig
     ├── extracted_symbol.py      # ExtractedSymbol, SymbolKind
@@ -39,16 +41,18 @@ src/history_extractor/
     └── symbol_version.py        # SymbolVersion
 
 scripts/
-├── demo_models.py               # Demo: model instantiation and key generation
-├── demo_database.py             # Demo: DB operations and deduplication
-├── demo_extractor.py            # Demo: parsing Python code and extracting symbols
-└── demo_module_paths.py         # Demo: module path resolution for different layouts
+├── demo_models.py       # Demo: model instantiation and key generation
+├── demo_database.py     # Demo: DB operations and deduplication
+├── demo_extractor.py    # Demo: parsing Python code and extracting symbols
+├── demo_module_paths.py # Demo: module path resolution for different layouts
+└── demo_miner.py        # Demo: mining a git repo and querying results
 
 tests/
-├── test_models.py               # Tests for all model classes
-├── test_database.py             # Tests for database operations
-├── test_extractor.py            # Tests for symbol extraction
-└── test_utils.py                # Tests for utility functions
+├── test_models.py       # Tests for all model classes
+├── test_database.py     # Tests for database operations
+├── test_extractor.py    # Tests for symbol extraction
+├── test_utils.py        # Tests for utility functions
+└── test_miner.py        # Tests for git mining
 ```
 
 ## Demo Scripts
@@ -83,4 +87,11 @@ Shows how file paths are converted to Python module names for different project 
 
 ```bash
 uv run python scripts/demo_module_paths.py
+```
+
+### Miner Demo
+Creates a sample git repository, mines it for symbols across commits, and shows version history and query examples.
+
+```bash
+uv run python scripts/demo_miner.py
 ```
