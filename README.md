@@ -5,14 +5,11 @@ Mine a Python repo's git history to extract all distinct versions of every funct
 ## Quick Start
 
 ```bash
-# Install
-uv sync
-
-# Extract symbols from a repo
-uv run codearc --repo /path/to/repo --db output.duckdb --verbose
+# Run directly (no install needed)
+uvx codearc --repo /path/to/repo --db output.duckdb --verbose
 
 # Query the results
-uv run python -c "
+python -c "
 import duckdb
 conn = duckdb.connect('output.duckdb')
 for row in conn.execute('SELECT qualname, kind, COUNT(*) as versions FROM symbol_versions GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 10').fetchall():
@@ -25,9 +22,21 @@ for row in conn.execute('SELECT qualname, kind, COUNT(*) as versions FROM symbol
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
+# As a CLI tool
+uv tool install codearc
+codearc --repo /path/to/repo --db output.duckdb
+
+# As a library
+uv add codearc
+```
+
+### From source
+
+```bash
 git clone https://github.com/drothermel/codearc.git
 cd codearc
 uv sync
+uv run codearc --help
 ```
 
 ## CLI Reference
