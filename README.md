@@ -25,7 +25,7 @@ for row in conn.execute('SELECT qualname, kind, COUNT(*) as versions FROM symbol
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/drothermel/history_extractor.git
 cd history-extractor
 uv sync
 ```
@@ -118,7 +118,7 @@ uv run pytest tests/ -v
 
 ### Project Structure
 
-```
+```text
 src/history_extractor/
 ├── cli.py               # Typer CLI entrypoint
 ├── database.py          # DuckDB schema + operations
