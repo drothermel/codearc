@@ -5,13 +5,13 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from history_extractor.database import SymbolDatabase
-from history_extractor.mining.ignore_patterns import IgnorePatterns
-from history_extractor.mining.miner import mine_repository
-from history_extractor.mining.mining_config import MiningConfig
+from codearc.database import SymbolDatabase
+from codearc.mining.ignore_patterns import IgnorePatterns
+from codearc.mining.miner import mine_repository
+from codearc.mining.mining_config import MiningConfig
 
 app = typer.Typer(
-    name="history-extractor",
+    name="codearc",
     help="Mine a Python repo's git history to extract symbol versions into DuckDB.",
     no_args_is_help=True,
 )

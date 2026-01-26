@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, computed_field
 
-from history_extractor.models.extracted_symbol import SymbolKind
+from codearc.models.extracted_symbol import SymbolKind
 
 
 class SymbolVersion(BaseModel):

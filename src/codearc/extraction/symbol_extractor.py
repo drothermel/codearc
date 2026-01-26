@@ -1,8 +1,8 @@
 import libcst as cst
 from libcst.metadata import PositionProvider
 
-from history_extractor.extraction.docstring import get_docstring
-from history_extractor.models.extracted_symbol import ExtractedSymbol, SymbolKind
+from codearc.extraction.docstring import get_docstring
+from codearc.models.extracted_symbol import ExtractedSymbol, SymbolKind
 
 
 class SymbolExtractor(cst.CSTVisitor):

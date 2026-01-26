@@ -4,7 +4,7 @@
 import tempfile
 from pathlib import Path
 
-from history_extractor.utils import file_path_to_module
+from codearc.utils import file_path_to_module
 
 
 def main() -> None:

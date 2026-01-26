@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Demo: Parse Python code and extract symbols."""
 
-from history_extractor.extraction.extract_symbols import extract_symbols
+from codearc.extraction.extract_symbols import extract_symbols
 
 SAMPLE_CODE = '''
 class DataProcessor:

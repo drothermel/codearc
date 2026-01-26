@@ -1,4 +1,4 @@
-# history-extractor
+# codearc
 
 Mine a Python repo's git history to extract all distinct versions of every function and class into a DuckDB database.
 
@@ -9,7 +9,7 @@ Mine a Python repo's git history to extract all distinct versions of every funct
 uv sync
 
 # Extract symbols from a repo
-uv run history-extractor --repo /path/to/repo --db output.duckdb --verbose
+uv run codearc --repo /path/to/repo --db output.duckdb --verbose
 
 # Query the results
 uv run python -c "
@@ -25,15 +25,15 @@ for row in conn.execute('SELECT qualname, kind, COUNT(*) as versions FROM symbol
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/drothermel/history_extractor.git
-cd history-extractor
+git clone https://github.com/drothermel/codearc.git
+cd codearc
 uv sync
 ```
 
 ## CLI Reference
 
 ```bash
-history-extractor --repo PATH --db OUTPUT.duckdb [options]
+codearc --repo PATH --db OUTPUT.duckdb [options]
 ```
 
 | Option | Description |
@@ -52,16 +52,16 @@ history-extractor --repo PATH --db OUTPUT.duckdb [options]
 
 ```bash
 # Mine a repo with verbose output
-history-extractor --repo ~/projects/mylib --db mylib.duckdb --verbose
+codearc --repo ~/projects/mylib --db mylib.duckdb --verbose
 
 # Filter by author and date
-history-extractor --repo . --db output.duckdb --authors "Alice,Bob" --since 2024-01-01
+codearc --repo . --db output.duckdb --authors "Alice,Bob" --since 2024-01-01
 
 # Resume from a specific commit
-history-extractor --repo . --db output.duckdb --since-commit abc123
+codearc --repo . --db output.duckdb --since-commit abc123
 
 # Add custom ignore patterns
-history-extractor --repo . --db output.duckdb --ignore "generated/*" --ignore "vendor/*"
+codearc --repo . --db output.duckdb --ignore "generated/*" --ignore "vendor/*"
 ```
 
 ## Features
@@ -119,7 +119,7 @@ uv run pytest tests/ -v
 ### Project Structure
 
 ```text
-src/history_extractor/
+src/codearc/
 ├── cli.py               # Typer CLI entrypoint
 ├── database.py          # DuckDB schema + operations
 ├── utils.py             # Hashing, module paths, encoding

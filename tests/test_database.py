@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from history_extractor.database import SymbolDatabase
-from history_extractor.mining.symbol_version import SymbolVersion
+from codearc.database import SymbolDatabase
+from codearc.mining.symbol_version import SymbolVersion
 
 
 @pytest.fixture

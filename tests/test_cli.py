@@ -4,8 +4,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from history_extractor.cli import app
-from history_extractor.database import SymbolDatabase
+from codearc.cli import app
+from codearc.database import SymbolDatabase
 
 runner = CliRunner()
 

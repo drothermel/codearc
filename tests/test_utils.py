@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from history_extractor.utils import compute_code_hash, file_path_to_module, safe_decode
+from codearc.utils import compute_code_hash, file_path_to_module, safe_decode
 
 
 class TestComputeCodeHash:

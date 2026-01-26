@@ -1,5 +1,5 @@
 [project]
-name = "history-extractor"
+name = "codearc"
 version = "0.1.0"
 description = "Mine a Python repo's git history to produce a DuckDB database of all distinct versions of every function/class"
 readme = "README.md"
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-history-extractor = "history_extractor.cli:app"
+codearc = "codearc.cli:app"
 
 [build-system]
 requires = ["hatchling"]

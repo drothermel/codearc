@@ -5,9 +5,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from history_extractor.database import SymbolDatabase
-from history_extractor.mining.miner import mine_repository
-from history_extractor.mining.mining_config import MiningConfig
+from codearc.database import SymbolDatabase
+from codearc.mining.miner import mine_repository
+from codearc.mining.mining_config import MiningConfig
 
 
 def create_sample_repo(repo_path: Path) -> None:

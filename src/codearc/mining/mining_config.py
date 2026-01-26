@@ -4,8 +4,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field, computed_field
 
-from history_extractor.mining.encoding_config import EncodingConfig
-from history_extractor.mining.ignore_patterns import IgnorePatterns
+from codearc.mining.encoding_config import EncodingConfig
+from codearc.mining.ignore_patterns import IgnorePatterns
 
 
 class MiningConfig(BaseModel):
