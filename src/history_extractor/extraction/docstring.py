@@ -1,5 +1,3 @@
-"""String and docstring extraction helpers for libcst."""
-
 import libcst as cst
 
 

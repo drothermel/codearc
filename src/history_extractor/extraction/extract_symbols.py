@@ -1,5 +1,3 @@
-"""Main symbol extraction function."""
-
 import logging
 
 import libcst as cst
@@ -29,7 +27,7 @@ def extract_symbols(source_code: str) -> list[ExtractedSymbol]:
     try:
         wrapper.visit(extractor)
     except Exception as e:
-        logger.warning("Failed to extract symbols: %s", e)
+        logger.warning("Failed to extract symbols: %s", e, exc_info=True)
         return []
 
     return extractor.symbols

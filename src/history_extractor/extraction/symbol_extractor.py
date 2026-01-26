@@ -1,5 +1,3 @@
-"""CST visitor for extracting symbols from Python source code."""
-
 import libcst as cst
 from libcst.metadata import PositionProvider
 
