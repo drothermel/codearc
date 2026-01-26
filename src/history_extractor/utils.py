@@ -1,4 +1,5 @@
 import hashlib
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -68,3 +69,10 @@ def safe_decode(content: bytes, encodings: list[str] | None = None) -> str | Non
         except (UnicodeDecodeError, LookupError):
             continue
     return None
+
+
+def ensure_utc(dt: datetime) -> datetime:
+    """Ensure datetime has UTC timezone."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)

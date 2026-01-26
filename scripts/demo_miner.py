@@ -6,8 +6,8 @@ import tempfile
 from pathlib import Path
 
 from history_extractor.database import SymbolDatabase
-from history_extractor.miner import mine_repository
-from history_extractor.models.config import ExtractionConfig
+from history_extractor.mining.miner import mine_repository
+from history_extractor.mining.mining_config import MiningConfig
 
 
 def create_sample_repo(repo_path: Path) -> None:
@@ -150,7 +150,7 @@ def main() -> None:
             print(f"  {line}")
 
         print("\n--- Mining Repository ---")
-        config = ExtractionConfig(repo_path=repo_path, db_path=db_path)
+        config = MiningConfig(repo_path=repo_path, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             stats = mine_repository(config, db)

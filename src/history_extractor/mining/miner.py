@@ -1,19 +1,25 @@
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 
 from pydriller import Repository
 
 from history_extractor.database import SymbolDatabase
-from history_extractor.extractor import extract_symbols
-from history_extractor.models.config import ExtractionConfig
-from history_extractor.models.stats import MiningStats
-from history_extractor.models.symbol import SymbolVersion
-from history_extractor.utils import compute_code_hash, file_path_to_module, safe_decode
+from history_extractor.extraction.extract_symbols import extract_symbols
+from history_extractor.mining.mining_config import MiningConfig
+from history_extractor.mining.mining_stats import MiningStats
+from history_extractor.mining.symbol_version import SymbolVersion
+from history_extractor.models.extracted_symbol import ExtractedSymbol
+from history_extractor.utils import (
+    compute_code_hash,
+    ensure_utc,
+    file_path_to_module,
+    safe_decode,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def mine_repository(config: ExtractionConfig, db: SymbolDatabase) -> MiningStats:
+def mine_repository(config: MiningConfig, db: SymbolDatabase) -> MiningStats:
     """
     Mine a git repository for symbol versions.
 
@@ -22,23 +28,9 @@ def mine_repository(config: ExtractionConfig, db: SymbolDatabase) -> MiningStats
     for crash safety.
     """
     stats = MiningStats()
-    repo_id = config.get_repo_id()
+    repo_id = config.effective_repo_id
 
-    # Build PyDriller options
-    repo_kwargs: dict = {
-        "only_modifications_with_file_types": [".py"],
-    }
-
-    if config.since_commit:
-        repo_kwargs["from_commit"] = config.since_commit
-    if config.since_date:
-        repo_kwargs["since"] = config.since_date
-    if config.authors:
-        repo_kwargs["only_authors"] = config.authors
-    if config.skip_merge_commits:
-        repo_kwargs["only_no_merge"] = True
-
-    repo = Repository(str(config.repo_path), **repo_kwargs)
+    repo = Repository(str(config.repo_path), **config.to_pydriller_kwargs())
 
     for commit in repo.traverse_commits():
         _process_commit(
@@ -59,7 +51,7 @@ def mine_repository(config: ExtractionConfig, db: SymbolDatabase) -> MiningStats
         db.update_state(
             repo_id=repo_id,
             commit_hash=commit.hash,
-            commit_time=_ensure_utc(commit.committer_date),
+            commit_time=ensure_utc(commit.committer_date),
             total_commits=stats.commits_processed,
             total_symbols=stats.symbols_extracted,
         )
@@ -67,15 +59,59 @@ def mine_repository(config: ExtractionConfig, db: SymbolDatabase) -> MiningStats
     return stats
 
 
+def _decode_source(
+    source: str | bytes,
+    encodings: list[str],
+    file_path: str,
+    commit_hash: str,
+    stats: MiningStats,
+) -> str | None:
+    """Decode source bytes, returning None on encoding failure."""
+    if isinstance(source, str):
+        return source
+    decoded = safe_decode(source, encodings)
+    if decoded is None:
+        logger.warning("Failed to decode %s in %s", file_path, commit_hash[:8])
+        stats.increment_encoding_errors()
+    return decoded
+
+
+def _create_symbol_version(
+    sym: ExtractedSymbol,
+    *,
+    repo_id: str,
+    commit_hash: str,
+    commit_time: datetime,
+    file_path: str,
+    module: str,
+) -> SymbolVersion:
+    """Convert an ExtractedSymbol to a SymbolVersion for DB storage."""
+    return SymbolVersion(
+        repo_id=repo_id,
+        commit_hash=commit_hash,
+        commit_time=commit_time,
+        file_path=file_path,
+        module=module,
+        name=sym.name,
+        qualname=sym.qualname,
+        kind=sym.kind,
+        code=sym.code,
+        code_hash=compute_code_hash(sym.code),
+        start_line=sym.start_line,
+        end_line=sym.end_line,
+        docstring=sym.docstring,
+    )
+
+
 def _process_commit(
     commit,
-    config: ExtractionConfig,
+    config: MiningConfig,
     db: SymbolDatabase,
     repo_id: str,
     stats: MiningStats,
 ) -> None:
     """Process a single commit, extracting symbols from modified Python files."""
-    commit_time = _ensure_utc(commit.committer_date)
+    commit_time = ensure_utc(commit.committer_date)
 
     for mod in commit.modified_files:
         # Skip non-Python files (should be filtered by PyDriller, but double-check)
@@ -96,14 +132,15 @@ def _process_commit(
             continue
 
         # Decode source code
-        source = mod.source_code
-        if isinstance(source, bytes):
-            decoded = safe_decode(source, config.encoding_config.encodings)
-            if decoded is None:
-                logger.warning("Failed to decode %s in %s", file_path, commit.hash[:8])
-                stats.increment_encoding_errors()
-                continue
-            source = decoded
+        source = _decode_source(
+            mod.source_code,
+            config.encoding_config.encodings,
+            file_path,
+            commit.hash,
+            stats,
+        )
+        if source is None:
+            continue
 
         # Extract symbols
         symbols = extract_symbols(source)
@@ -121,30 +158,15 @@ def _process_commit(
         )
 
         for sym in symbols:
-            code_hash = compute_code_hash(sym.code)
-            version = SymbolVersion(
+            version = _create_symbol_version(
+                sym,
                 repo_id=repo_id,
                 commit_hash=commit.hash,
                 commit_time=commit_time,
                 file_path=file_path,
                 module=module,
-                name=sym.name,
-                qualname=sym.qualname,
-                kind=sym.kind,
-                code=sym.code,
-                code_hash=code_hash,
-                start_line=sym.start_line,
-                end_line=sym.end_line,
-                docstring=sym.docstring,
             )
             db.add(version)
             stats.add_symbols(1)
 
         stats.increment_files_processed()
-
-
-def _ensure_utc(dt: datetime) -> datetime:
-    """Ensure datetime has UTC timezone."""
-    if dt.tzinfo is None:
-        return dt.replace(tzinfo=UTC)
-    return dt.astimezone(UTC)

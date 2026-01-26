@@ -4,8 +4,9 @@ from pathlib import Path
 import pytest
 
 from history_extractor.database import SymbolDatabase
-from history_extractor.miner import mine_repository
-from history_extractor.models.config import ExtractionConfig, IgnorePatterns
+from history_extractor.mining.ignore_patterns import IgnorePatterns
+from history_extractor.mining.miner import mine_repository
+from history_extractor.mining.mining_config import MiningConfig
 
 
 @pytest.fixture
@@ -71,7 +72,7 @@ def db_path(tmp_path: Path) -> Path:
 
 class TestMineRepository:
     def test_basic_mining(self, git_repo: Path, db_path: Path) -> None:
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             stats = mine_repository(config, db)
@@ -86,7 +87,7 @@ class TestMineRepository:
             assert count >= 4
 
     def test_extracts_different_versions(self, git_repo: Path, db_path: Path) -> None:
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             mine_repository(config, db)
@@ -107,7 +108,7 @@ class TestMineRepository:
     def test_extracts_methods_with_qualname(
         self, git_repo: Path, db_path: Path
     ) -> None:
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             mine_repository(config, db)
@@ -133,7 +134,7 @@ class TestMineRepository:
             capture_output=True,
         )
 
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             stats = mine_repository(config, db)
@@ -158,7 +159,7 @@ class TestMineRepository:
             capture_output=True,
         )
 
-        config = ExtractionConfig(
+        config = MiningConfig(
             repo_path=git_repo,
             db_path=db_path,
             ignore_patterns=IgnorePatterns(patterns=["generated.py"]),
@@ -174,7 +175,7 @@ class TestMineRepository:
         assert len(results) == 0
 
     def test_extraction_state_updated(self, git_repo: Path, db_path: Path) -> None:
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             mine_repository(config, db)
@@ -189,7 +190,7 @@ class TestMineRepository:
         self, git_repo: Path, db_path: Path
     ) -> None:
         """Verify persisted commit count matches returned stats (no off-by-one)."""
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             stats = mine_repository(config, db)
@@ -206,7 +207,7 @@ class TestMineRepository:
         assert persisted_count == 3  # Sanity check: we created 3 commits
 
     def test_repo_id_from_config(self, git_repo: Path, db_path: Path) -> None:
-        config = ExtractionConfig(
+        config = MiningConfig(
             repo_path=git_repo,
             db_path=db_path,
             repo_id="custom-repo-id",
@@ -232,7 +233,7 @@ class TestMineRepository:
             capture_output=True,
         )
 
-        config = ExtractionConfig(repo_path=git_repo, db_path=db_path)
+        config = MiningConfig(repo_path=git_repo, db_path=db_path)
 
         # Should not raise
         with SymbolDatabase(db_path) as db:
@@ -248,7 +249,7 @@ class TestMineRepository:
         repo_path.mkdir()
         subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
 
-        config = ExtractionConfig(repo_path=repo_path, db_path=db_path)
+        config = MiningConfig(repo_path=repo_path, db_path=db_path)
 
         with SymbolDatabase(db_path) as db:
             stats = mine_repository(config, db)

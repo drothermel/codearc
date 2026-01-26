@@ -1,14 +1,15 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel, Field, computed_field
 
-from history_extractor.models.encoding_config import EncodingConfig
-from history_extractor.models.ignore_patterns import IgnorePatterns
+from history_extractor.mining.encoding_config import EncodingConfig
+from history_extractor.mining.ignore_patterns import IgnorePatterns
 
 
-class ExtractionConfig(BaseModel):
-    """Configuration for the extraction process."""
+class MiningConfig(BaseModel):
+    """Configuration for the mining process."""
 
     repo_path: Path = Field(description="Path to the git repository")
     db_path: Path = Field(description="Path to the output DuckDB database")
@@ -44,3 +45,18 @@ class ExtractionConfig(BaseModel):
     def effective_repo_id(self) -> str:
         """Repo id derived from explicit repo_id or repo_path."""
         return self.repo_id or self.repo_path.name
+
+    def to_pydriller_kwargs(self) -> dict[str, Any]:
+        """Build kwargs dict for PyDriller Repository constructor."""
+        kwargs: dict[str, Any] = {
+            "only_modifications_with_file_types": [".py"],
+        }
+        if self.since_commit:
+            kwargs["from_commit"] = self.since_commit
+        if self.since_date:
+            kwargs["since"] = self.since_date
+        if self.authors:
+            kwargs["only_authors"] = self.authors
+        if self.skip_merge_commits:
+            kwargs["only_no_merge"] = True
+        return kwargs

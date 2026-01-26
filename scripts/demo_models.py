@@ -4,11 +4,11 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
+from history_extractor.mining.ignore_patterns import IgnorePatterns
+from history_extractor.mining.mining_config import MiningConfig
+from history_extractor.mining.mining_stats import MiningStats
+from history_extractor.mining.symbol_version import SymbolVersion
 from history_extractor.models.extracted_symbol import ExtractedSymbol
-from history_extractor.models.extraction_config import ExtractionConfig
-from history_extractor.models.ignore_patterns import IgnorePatterns
-from history_extractor.models.mining_stats import MiningStats
-from history_extractor.models.symbol_version import SymbolVersion
 
 
 def demo_ignore_patterns() -> None:
@@ -35,12 +35,12 @@ def demo_ignore_patterns() -> None:
     print()
 
 
-def demo_extraction_config() -> None:
-    print("=== Extraction Config ===")
-    print("ExtractionConfig holds all settings for a mining run.")
+def demo_mining_config() -> None:
+    print("=== Mining Config ===")
+    print("MiningConfig holds all settings for a mining run.")
     print("It bundles repo path, output DB, filters, and sub-configs.\n")
 
-    config = ExtractionConfig(
+    config = MiningConfig(
         repo_path=Path("/home/user/my-project"),
         db_path=Path("/tmp/symbols.duckdb"),
         authors=["alice", "bob"],
@@ -126,7 +126,7 @@ def demo_stats() -> None:
 
 if __name__ == "__main__":
     demo_ignore_patterns()
-    demo_extraction_config()
+    demo_mining_config()
     demo_symbol_keys()
     demo_extracted_symbol()
     demo_stats()

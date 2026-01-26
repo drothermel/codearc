@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from history_extractor.models.encoding_config import EncodingConfig
+from history_extractor.mining.encoding_config import EncodingConfig
+from history_extractor.mining.ignore_patterns import IgnorePatterns
+from history_extractor.mining.mining_config import MiningConfig
+from history_extractor.mining.mining_stats import MiningStats
+from history_extractor.mining.symbol_version import SymbolVersion
 from history_extractor.models.extracted_symbol import ExtractedSymbol
-from history_extractor.models.extraction_config import ExtractionConfig
-from history_extractor.models.ignore_patterns import IgnorePatterns
-from history_extractor.models.mining_stats import MiningStats
-from history_extractor.models.symbol_version import SymbolVersion
 
 
 class TestIgnorePatterns:
@@ -52,9 +52,9 @@ class TestEncodingConfig:
         assert len(config.encodings) >= 2
 
 
-class TestExtractionConfig:
+class TestMiningConfig:
     def test_minimal_config(self) -> None:
-        config = ExtractionConfig(
+        config = MiningConfig(
             repo_path=Path("/tmp/repo"),
             db_path=Path("/tmp/out.duckdb"),
         )
@@ -63,19 +63,47 @@ class TestExtractionConfig:
         assert config.authors is None
 
     def test_effective_repo_id_from_path(self) -> None:
-        config = ExtractionConfig(
+        config = MiningConfig(
             repo_path=Path("/home/user/my-project"),
             db_path=Path("/tmp/out.duckdb"),
         )
         assert config.effective_repo_id == "my-project"
 
     def test_effective_repo_id_explicit(self) -> None:
-        config = ExtractionConfig(
+        config = MiningConfig(
             repo_path=Path("/tmp/repo"),
             db_path=Path("/tmp/out.duckdb"),
             repo_id="custom-id",
         )
         assert config.effective_repo_id == "custom-id"
+
+    def test_to_pydriller_kwargs_minimal(self) -> None:
+        config = MiningConfig(
+            repo_path=Path("/tmp/repo"),
+            db_path=Path("/tmp/out.duckdb"),
+        )
+        kwargs = config.to_pydriller_kwargs()
+        assert kwargs["only_modifications_with_file_types"] == [".py"]
+        assert kwargs["only_no_merge"] is True
+        assert "from_commit" not in kwargs
+        assert "since" not in kwargs
+        assert "only_authors" not in kwargs
+
+    def test_to_pydriller_kwargs_full(self) -> None:
+        dt = datetime(2024, 1, 1, tzinfo=UTC)
+        config = MiningConfig(
+            repo_path=Path("/tmp/repo"),
+            db_path=Path("/tmp/out.duckdb"),
+            since_commit="abc123",
+            since_date=dt,
+            authors=["alice", "bob"],
+            skip_merge_commits=False,
+        )
+        kwargs = config.to_pydriller_kwargs()
+        assert kwargs["from_commit"] == "abc123"
+        assert kwargs["since"] == dt
+        assert kwargs["only_authors"] == ["alice", "bob"]
+        assert "only_no_merge" not in kwargs
 
 
 class TestExtractedSymbol:
