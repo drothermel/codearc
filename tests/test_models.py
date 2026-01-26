@@ -62,20 +62,20 @@ class TestExtractionConfig:
         assert config.skip_merge_commits is True
         assert config.authors is None
 
-    def test_get_repo_id_from_path(self) -> None:
+    def test_effective_repo_id_from_path(self) -> None:
         config = ExtractionConfig(
             repo_path=Path("/home/user/my-project"),
             db_path=Path("/tmp/out.duckdb"),
         )
-        assert config.get_repo_id() == "my-project"
+        assert config.effective_repo_id == "my-project"
 
-    def test_get_repo_id_explicit(self) -> None:
+    def test_effective_repo_id_explicit(self) -> None:
         config = ExtractionConfig(
             repo_path=Path("/tmp/repo"),
             db_path=Path("/tmp/out.duckdb"),
             repo_id="custom-id",
         )
-        assert config.get_repo_id() == "custom-id"
+        assert config.effective_repo_id == "custom-id"
 
 
 class TestExtractedSymbol:

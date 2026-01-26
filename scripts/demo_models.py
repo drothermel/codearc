@@ -47,7 +47,7 @@ def demo_extraction_config() -> None:
         skip_merge_commits=True,
     )
     print(f"  Repo path: {config.repo_path}")
-    print(f"  Repo ID (derived): {config.get_repo_id()}")
+    print(f"  Repo ID (derived): {config.effective_repo_id}")
     print(f"  Authors filter: {config.authors}")
     print(f"  Skip merges: {config.skip_merge_commits}")
     print()

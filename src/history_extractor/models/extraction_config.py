@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from history_extractor.models.encoding_config import EncodingConfig
 from history_extractor.models.ignore_patterns import IgnorePatterns
@@ -39,6 +39,8 @@ class ExtractionConfig(BaseModel):
     ignore_patterns: IgnorePatterns = Field(default_factory=IgnorePatterns)
     encoding_config: EncodingConfig = Field(default_factory=EncodingConfig)
 
-    def get_repo_id(self) -> str:
-        """Return repo_id or derive from repo_path."""
+    @computed_field
+    @property
+    def effective_repo_id(self) -> str:
+        """Repo identifier: explicit repo_id if set, otherwise derived from repo_path."""
         return self.repo_id or self.repo_path.name
