@@ -26,9 +26,13 @@ class MiningStats(BaseModel):
         self.files_skipped += 1
 
     def add_symbols(self, count: int) -> None:
+        if count < 0:
+            raise ValueError(f"count must be non-negative, got {count}")
         self.symbols_extracted += count
 
     def add_deduplicated(self, count: int) -> None:
+        if count < 0:
+            raise ValueError(f"count must be non-negative, got {count}")
         self.symbols_deduplicated += count
 
     def increment_parse_errors(self) -> None:
