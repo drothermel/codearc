@@ -62,7 +62,7 @@ def file_path_to_module(
 
 def safe_decode(content: bytes, encodings: list[str] | None = None) -> str | None:
     """Try to decode bytes using multiple encodings."""
-    encodings = encodings or ["utf-8", "latin-1", "cp1252"]
+    encodings = encodings or ["utf-8", "cp1252", "latin-1"]
     for encoding in encodings:
         try:
             return content.decode(encoding)
