@@ -1,4 +1,4 @@
-from history_extractor.extractor import extract_symbols
+from history_extractor.extraction.extract_symbols import extract_symbols
 
 
 class TestExtractSymbols:
