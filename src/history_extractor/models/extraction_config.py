@@ -42,5 +42,5 @@ class ExtractionConfig(BaseModel):
     @computed_field
     @property
     def effective_repo_id(self) -> str:
-        """Repo identifier: explicit repo_id if set, otherwise derived from repo_path."""
+        """Repo id derived from explicit repo_id or repo_path."""
         return self.repo_id or self.repo_path.name

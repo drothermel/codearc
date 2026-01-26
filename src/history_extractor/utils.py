@@ -7,6 +7,32 @@ def compute_code_hash(code: str) -> str:
     return hashlib.sha256(code.encode("utf-8")).hexdigest()[:16]
 
 
+def make_absolute(path: Path, repo_root: Path) -> Path:
+    return path if path.is_absolute() else repo_root / path
+
+
+def get_base_path(package_root: Path | None, repo_root: Path) -> Path:
+    if package_root:
+        abs_package_root = make_absolute(package_root, repo_root)
+        if not abs_package_root.is_dir():
+            raise ValueError(f"Package root {abs_package_root} is not a directory")
+        return abs_package_root
+    if (src_dir := repo_root / "src").is_dir():
+        return src_dir
+    return repo_root
+
+
+def convert_file_path_to_module(file_path: Path, base_path: Path) -> str:
+    rel_path = file_path.relative_to(base_path)
+    module_path = str(rel_path).removesuffix(".py").replace("/", ".").replace("\\", ".")
+    if module_path.endswith(".__init__"):
+        module_path = module_path.removesuffix(".__init__")
+    elif module_path == "__init__":
+        # Edge case: just __init__.py at the root
+        module_path = ""
+    return module_path
+
+
 def file_path_to_module(
     file_path: str,
     repo_root: Path,
@@ -24,57 +50,21 @@ def file_path_to_module(
         src/foo/bar.py -> foo.bar
         mypackage/utils.py -> mypackage.utils
     """
-    path = Path(file_path)
-
-    # If path is relative, make it absolute relative to repo_root
-    if not path.is_absolute():
-        path = repo_root / path
-
-    # Determine the base path for module calculation
-    if package_root is not None:
-        base = package_root if package_root.is_absolute() else repo_root / package_root
-    elif (repo_root / "src").is_dir():
-        base = repo_root / "src"
-    else:
-        base = repo_root
-
-    # Make path relative to base
+    path = make_absolute(Path(file_path), repo_root)
+    base = get_base_path(package_root, repo_root)
     try:
-        rel_path = path.relative_to(base)
-    except ValueError:
-        # Path is not under base, try relative to repo root
-        try:
-            rel_path = path.relative_to(repo_root)
-        except ValueError:
-            # Fall back to just the filename
-            rel_path = Path(path.name)
-
-    # Convert path to module: remove .py, replace / with .
-    module_path = str(rel_path).removesuffix(".py").replace("/", ".").replace("\\", ".")
-
-    # Handle __init__.py -> package name
-    if module_path.endswith(".__init__"):
-        module_path = module_path.removesuffix(".__init__")
-    elif module_path == "__init__":
-        # Edge case: just __init__.py at the root
-        module_path = ""
-
+        module_path = convert_file_path_to_module(path, base)
+    except ValueError as e:
+        raise ValueError(f"File path {path} is not under base {base}") from e
     return module_path
 
 
 def safe_decode(content: bytes, encodings: list[str] | None = None) -> str | None:
-    """
-    Try to decode bytes using multiple encodings.
-
-    Returns decoded string or None if all encodings fail.
-    """
-    if encodings is None:
-        encodings = ["utf-8", "latin-1", "cp1252"]
-
+    """Try to decode bytes using multiple encodings."""
+    encodings = encodings or ["utf-8", "latin-1", "cp1252"]
     for encoding in encodings:
         try:
             return content.decode(encoding)
         except (UnicodeDecodeError, LookupError):
             continue
-
     return None

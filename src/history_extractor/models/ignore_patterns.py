@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
 from fnmatch import fnmatch
+
+from pydantic import BaseModel, Field
 
 
 class IgnorePatterns(BaseModel):
