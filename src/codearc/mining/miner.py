@@ -151,11 +151,17 @@ def _process_commit(
             continue
 
         # Convert to SymbolVersion and add to DB
-        module = file_path_to_module(
-            file_path,
-            config.repo_path,
-            config.package_root,
-        )
+        try:
+            module = file_path_to_module(
+                file_path,
+                config.repo_path,
+                config.package_root,
+            )
+        except ValueError:
+            # File is outside package root (e.g., tests/, scripts/)
+            # Skip since we only extract from package code
+            stats.increment_files_processed()
+            continue
 
         for sym in symbols:
             version = _create_symbol_version(
