@@ -3,43 +3,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-
-class IgnorePatterns(BaseModel):
-    """Glob patterns for files/directories to skip during extraction."""
-
-    patterns: list[str] = Field(
-        default=[
-            "**/venv/**",
-            "**/.venv/**",
-            ".venv/**",
-            "venv/**",
-            "**/site-packages/**",
-            "**/__pycache__/**",
-            "__pycache__/**",
-            "**/node_modules/**",
-            "**/.git/**",
-            ".git/**",
-            "*_pb2.py",
-            "*_pb2_grpc.py",
-            "**/.tox/**",
-            "**/.nox/**",
-            "**/build/**",
-            "**/dist/**",
-            "**/*.egg-info/**",
-        ]
-    )
-
-    def matches(self, path: str) -> bool:
-        """Check if path matches any ignore pattern."""
-        from fnmatch import fnmatch
-
-        return any(fnmatch(path, pattern) for pattern in self.patterns)
-
-
-class EncodingConfig(BaseModel):
-    """Encoding fallbacks for reading source files."""
-
-    encodings: list[str] = Field(default=["utf-8", "latin-1", "cp1252", "iso-8859-1"])
+from history_extractor.models.encoding_config import EncodingConfig
+from history_extractor.models.ignore_patterns import IgnorePatterns
 
 
 class ExtractionConfig(BaseModel):

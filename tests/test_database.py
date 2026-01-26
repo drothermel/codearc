@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from history_extractor.database import SymbolDatabase
-from history_extractor.models.symbol import SymbolVersion
+from history_extractor.models.symbol_version import SymbolVersion
 
 
 @pytest.fixture

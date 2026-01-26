@@ -6,7 +6,7 @@ from typing import Self
 
 import duckdb
 
-from history_extractor.models.symbol import SymbolVersion
+from history_extractor.models.symbol_version import SymbolVersion
 
 logger = logging.getLogger(__name__)
 

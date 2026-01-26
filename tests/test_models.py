@@ -3,13 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from history_extractor.models.config import (
-    EncodingConfig,
-    ExtractionConfig,
-    IgnorePatterns,
-)
-from history_extractor.models.stats import MiningStats
-from history_extractor.models.symbol import ExtractedSymbol, SymbolVersion
+from history_extractor.models.encoding_config import EncodingConfig
+from history_extractor.models.extracted_symbol import ExtractedSymbol
+from history_extractor.models.extraction_config import ExtractionConfig
+from history_extractor.models.ignore_patterns import IgnorePatterns
+from history_extractor.models.mining_stats import MiningStats
+from history_extractor.models.symbol_version import SymbolVersion
 
 
 class TestIgnorePatterns:
