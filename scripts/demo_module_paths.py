@@ -65,6 +65,7 @@ def main() -> None:
         print()
 
         package_root = repo_root / "lib" / "python"
+        package_root.mkdir(parents=True)
         cases = [
             ("lib/python/mypackage/core.py", "mypackage.core"),
         ]
